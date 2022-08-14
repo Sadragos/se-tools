@@ -18,6 +18,10 @@ public class ImageConverter {
     }
 
     public static void convertFile(File file) throws IOException, InterruptedException {
+        if(!file.isFile()) {
+            System.out.println("Skipping " + file.getName() + " - not a file");
+            return;
+        }
         if (!TEXTCONV_PATH.exists()) {
             RessourceCopy ressourceCopy = new RessourceCopy();
             try {

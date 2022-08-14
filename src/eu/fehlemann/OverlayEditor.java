@@ -60,6 +60,10 @@ public class OverlayEditor {
     }
 
     public static void addOverlays(File image, Overlay overlay) throws IOException {
+        if(!image.isFile()) {
+            System.out.println("Skipping " + image.getName() + " - not an image");
+            return;
+        }
         File target = new File(image.getParent(), image.getName().substring(0, image.getName().indexOf(".")) + overlay.file.getName().substring(0, overlay.file.getName().indexOf(".")) + ".png");
 
         BufferedImage overlayImage = resize(ImageIO.read(overlay.file), overlay.width, overlay.height);

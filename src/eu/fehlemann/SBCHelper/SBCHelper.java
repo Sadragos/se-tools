@@ -21,13 +21,43 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
 
 public class SBCHelper {
-    public static void process(File file, Processor[] processors) throws IOException, ParserConfigurationException, SAXException, TransformerException {
+
+    public static Document process(File file, Processor[] processors) throws IOException, ParserConfigurationException, SAXException, TransformerException {
+        return process(file, processors, "CubeBlocks", "Definition");
+    }
+
+    public static Map<String, Integer> preflightTieredDefinitions(File file) throws ParserConfigurationException, IOException, SAXException {
+        Map<String, Integer> result = new HashMap<>();
+        Scanner scanner = new Scanner(System.in);
         Document doc = getDocument(file);
         NodeList blocks = doc.getElementsByTagName("CubeBlocks");
         Node block = blocks.item(0);
         NodeList definitions = doc.getElementsByTagName("Definition");
+        for (int i = 0; i < definitions.getLength(); i++) {
+            Element element = (Element) definitions.item(i);
+            SBCID id = getDefinitionId(element);
+            if (id != null) {
+                System.out.println("Current Definition: " + id.toString());
+                String text = scanner.nextLine();
+                if (text.trim().equals("")) {
+                    continue;
+                }
+                result.put(id.toString(), Integer.valueOf(text));
+            }
+        }
+        return result;
+    }
+
+    public static Document process(File file, Processor[] processors, String root, String elements) throws IOException, ParserConfigurationException, SAXException, TransformerException {
+        Document doc = getDocument(file);
+        NodeList blocks = doc.getElementsByTagName(root);
+        Node block = blocks.item(0);
+        NodeList definitions = doc.getElementsByTagName(elements);
         ArrayList<Node> remove = new ArrayList<>();
         for (int i = 0; i < definitions.getLength(); i++) {
             Element element = (Element) definitions.item(i);
@@ -45,7 +75,7 @@ public class SBCHelper {
         for (Node n : remove) {
             block.removeChild(n);
         }
-        writeDocument(doc, file);
+        return doc;
     }
 
     public static Document getDocument(File file) throws ParserConfigurationException, IOException, SAXException {
@@ -58,7 +88,7 @@ public class SBCHelper {
 
     public static void writeDocument(Document doc, File file) throws TransformerException, FileNotFoundException {
         Transformer transformer = TransformerFactory.newInstance().newTransformer();
-        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+        transformer.setOutputProperty(OutputKeys.INDENT, "no");
         transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
         doc.getDocumentElement().normalize();
         DOMSource source = new DOMSource(doc);

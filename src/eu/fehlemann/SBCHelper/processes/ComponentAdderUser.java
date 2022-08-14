@@ -30,7 +30,7 @@ public class ComponentAdderUser extends ComponentAdder {
             if(!value.trim().equals("")) {
                 component.setAttribute("Count", value);
                 addDeconstruct(component);
-                componentElement.appendChild(component);
+                componentElement.insertBefore(component, componentElement.getFirstChild());
             }
         }
         return true;
